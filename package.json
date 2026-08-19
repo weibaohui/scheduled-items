@@ -1,0 +1,52 @@
+{
+  "name": "dsh-plugin-scheduled-items",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness plugin: cron-driven scheduled items. Each item carries a title, a prompt, and a croner expression; executions spawn a fresh agent session in a bound workspace (or the default cwd) and run on schedule or on demand. Includes a full-page management UI.",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "cordis",
+    "plugin",
+    "cron",
+    "schedule",
+    "scheduled-items"
+  ],
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./client/bundle.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "files": [
+    "src",
+    "client",
+    "cordis.patch.yml"
+  ],
+  "scripts": {
+    "check": "node --check src/index.js && node --check client/index.js",
+    "test": "node --test test/*.test.mjs",
+    "build:client": "node scripts/build-client.mjs"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "dependencies": {
+    "croner": "^9.1.0",
+    "zod": "^4.4.3"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  }
+}
