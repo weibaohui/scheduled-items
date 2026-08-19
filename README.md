@@ -6,14 +6,22 @@ DeepSeek Harness 插件：**cron 定时事项**。每个事项包含标题、提
 
 ### 通过 `dsh plugin add`（推荐，GitHub 或 npm）
 
+从插件合集仓库的子目录安装（`#path:` 指向子目录，引号防止 shell 展开）：
+
 ```bash
-dsh plugin --profile web add github:<你的账号>/dsh-plugin-scheduled-items
+dsh plugin --profile web add 'github:weibaohui/dsh-plugins#path:scheduled-items' -w
+```
+
+或从本插件独立仓库安装：
+
+```bash
+dsh plugin --profile web add github:weibaohui/dsh-plugin-scheduled-items -w
 ```
 
 或发布到 npm 后：
 
 ```bash
-dsh plugin --profile web add dsh-plugin-scheduled-items
+dsh plugin --profile web add dsh-plugin-scheduled-items -w
 ```
 
 `dsh plugin` 会在 profile 目录转发给 pnpm，并将包调和进 profile 的 bundle 列表（`dsh.profile.bundles`）。包内 `cordis.patch.yml`（经 `package.json` 的 `dsh.bundle.patch` 声明）随后把插件行插入宿主组合；`dsh.client` 声明则让 web 外壳加载 `client/bundle.js` 作为管理界面。
