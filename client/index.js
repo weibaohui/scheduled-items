@@ -209,7 +209,7 @@ function lastRunText(t, item) {
 }
 
 module.exports = {
-  name: 'scheduled-items-client',
+  name: '@weibaohui/scheduled-items',
   // Only `slots` is a resolvable service in the static bundle environment;
   // `locale` is resolved dynamically below so the plugin never waits on a
   // service name the web module loader does not serve.

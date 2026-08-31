@@ -2,7 +2,7 @@
  * Regenerate with: npm run build:client
  */
 window.__ModuleLoader__.load({
-  id: "dsh-plugin-scheduled-items",
+  id: "@weibaohui/scheduled-items",
   factory: (require) => {
     var module = { exports: {} }
     var exports = module.exports
@@ -219,7 +219,7 @@ window.__ModuleLoader__.load({
     }
 
     module.exports = {
-      name: 'scheduled-items-client',
+      name: '@weibaohui/scheduled-items',
       // Only `slots` is a resolvable service in the static bundle environment;
       // `locale` is resolved dynamically below so the plugin never waits on a
       // service name the web module loader does not serve.
