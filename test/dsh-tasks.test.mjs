@@ -9,7 +9,7 @@ import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 const { __test } = require('../src/index.js')
 
-const { itemSchema, domainSpec, validateCron, buildRecord } = __test
+const { itemSchema, domainSpec, validateCron, buildRecord, withRun, runStamp, MAX_RUNS } = __test
 
 test('item schema accepts a complete record', () => {
   const record = {
@@ -99,4 +99,49 @@ test('buildRecord rejects missing required fields', () => {
 
 test('buildRecord rejects an invalid cron before stamping', () => {
   assert.throws(() => buildRecord({ title: 'T', prompt: 'P', cron: 'nope', enabled: true }), /invalid cron/)
+})
+
+test('buildRecord starts with an empty run history', () => {
+  const record = buildRecord({ title: 'T', prompt: 'P', cron: '0 9 * * *', enabled: true })
+  assert.deepEqual(record.runs, [])
+})
+
+test('item schema accepts a run history with session ids', () => {
+  const record = {
+    ...buildRecord({ title: 'T', prompt: 'P', cron: '0 9 * * *', enabled: true }),
+    runs: [
+      { at: '2026-08-31T01:00:00.000Z', ok: true, sessionId: 'session-abc' },
+      { at: '2026-08-31T02:00:00.000Z', ok: false, error: 'boom' },
+    ],
+  }
+  const parsed = itemSchema.safeParse(record)
+  assert.equal(parsed.success, true)
+  assert.equal(parsed.data.runs[0].sessionId, 'session-abc')
+  assert.equal(parsed.data.runs[1].error, 'boom')
+})
+
+test('withRun appends an entry and refreshes the last-run summary', () => {
+  const record = buildRecord({ title: 'T', prompt: 'P', cron: '0 9 * * *', enabled: true })
+  const ok = withRun(record, { at: '2026-08-31T01:00:00.000Z', ok: true, sessionId: 's1' })
+  assert.equal(ok.runs.length, 1)
+  assert.equal(ok.lastRunAt, '2026-08-31T01:00:00.000Z')
+  assert.equal(ok.lastRunError, undefined)
+  const failed = withRun(ok, { at: '2026-08-31T02:00:00.000Z', ok: false, error: 'boom' })
+  assert.equal(failed.runs.length, 2)
+  assert.equal(failed.lastRunError, 'boom')
+  assert.equal(failed.runs[1].ok, false)
+})
+
+test('withRun caps history at MAX_RUNS, keeping the newest entries', () => {
+  let record = buildRecord({ title: 'T', prompt: 'P', cron: '0 9 * * *', enabled: true })
+  for (let i = 0; i < MAX_RUNS + 5; i++) {
+    record = withRun(record, { at: new Date(2026, 7, 1, 9, i).toISOString(), ok: true, sessionId: `s${i}` })
+  }
+  assert.equal(record.runs.length, MAX_RUNS)
+  assert.equal(record.runs[0].sessionId, 's5')
+  assert.equal(record.runs[MAX_RUNS - 1].sessionId, `s${MAX_RUNS + 4}`)
+})
+
+test('runStamp produces a compact MM-DD HH:mm stamp', () => {
+  assert.match(runStamp('2026-08-31T01:05:00.000Z'), /^\d{2}-\d{2} \d{2}:\d{2}$/)
 })

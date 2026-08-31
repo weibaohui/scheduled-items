@@ -20,6 +20,17 @@ const { randomUUID } = require('node:crypto')
 const { Cron } = require('croner')
 const { z } = require('zod')
 
+/** Most recent runs kept per item, oldest entries trimmed beyond this. */
+const MAX_RUNS = 20
+
+/** One execution attempt: when it ran, the session it spawned, and the outcome. */
+const runSchema = z.object({
+  at: z.string(),
+  ok: z.boolean(),
+  sessionId: z.string().optional(),
+  error: z.string().optional(),
+})
+
 /** Durable shape of one scheduled item. */
 const itemSchema = z.object({
   id: z.string(),
@@ -32,6 +43,7 @@ const itemSchema = z.object({
   updatedAt: z.string(),
   lastRunAt: z.string().optional(),
   lastRunError: z.string().optional(),
+  runs: z.array(runSchema).optional(),
 })
 
 /** The dsh-tasks domain: one `items` table keyed by item id. */
@@ -60,6 +72,24 @@ function validateCron(expression) {
   }
 }
 
+/** Short local timestamp (`MM-DD HH:mm`) used to distinguish repeated runs in the sidebar. */
+function runStamp(iso) {
+  const d = new Date(iso)
+  const p = (n) => String(n).padStart(2, '0')
+  return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
+/** Append one run to the history (capped) and refresh the last-run summary fields. */
+function withRun(record, entry) {
+  const runs = [...(record.runs || []), entry].slice(-MAX_RUNS)
+  return {
+    ...record,
+    runs,
+    lastRunAt: entry.at,
+    lastRunError: entry.ok ? undefined : (entry.error || 'failed'),
+  }
+}
+
 /** Build one fresh item record from validated input. */
 function buildRecord(input) {
   if (!input || typeof input.title !== 'string' || typeof input.prompt !== 'string'
@@ -78,6 +108,7 @@ function buildRecord(input) {
     ...(input.workspaceId === undefined ? {} : { workspaceId: input.workspaceId }),
     createdAt: now,
     updatedAt: now,
+    runs: [],
   }
 }
 
@@ -87,7 +118,7 @@ module.exports = {
 
   // Exposed for the offline test suite only (test/*.test.mjs); Cordis
   // ignores unknown export properties.
-  __test: { itemSchema, domainSpec, validateCron, buildRecord },
+  __test: { itemSchema, runSchema, domainSpec, validateCron, buildRecord, runStamp, withRun, MAX_RUNS },
 
   /**
    * Mount the store, the croner schedule, and the HTTP API.
@@ -166,12 +197,14 @@ module.exports = {
         if (workspace !== undefined) {
           await workspace.attachSession(sessionId)
         }
-        // Set the session title to the item's title. Append directly to the
-        // session log with a 'user' source, which pins the title and prevents
-        // automatic title generation from overwriting it.
+        // Pin the session title to the item's title plus a run timestamp, so
+        // repeated runs of one item stay distinguishable in the sidebar. Append
+        // directly to the session log with a 'user' source to prevent automatic
+        // title generation from overwriting it.
+        const sessionTitle = `${record.title} · ${runStamp(startedAt)}`
         try {
           handle.agent.session.append('session/title', {
-            title: record.title,
+            title: sessionTitle,
             messageSeqs: [],
             source: { kind: 'user' },
           })
@@ -186,9 +219,9 @@ module.exports = {
           source: { kind: 'plugin', plugin: 'dsh-tasks' },
         }
         handle.agent.followup(message)
-        return { ...record, lastRunAt: startedAt, lastRunError: undefined }
+        return withRun(record, { at: startedAt, ok: true, sessionId })
       } catch (error) {
-        return { ...record, lastRunAt: startedAt, lastRunError: String((error && error.message) || error) }
+        return withRun(record, { at: startedAt, ok: false, error: String((error && error.message) || error) })
       }
     }
 
@@ -237,6 +270,7 @@ module.exports = {
         ...(input.workspaceId === undefined ? {} : { workspaceId: input.workspaceId }),
         createdAt: now,
         updatedAt: now,
+        runs: [],
       }
       await requireTable().put(id, record)
       rescheduleOne(id, record)
@@ -300,6 +334,22 @@ module.exports = {
         try {
           const url = new URL(req.url || '/', 'http://dsh.local')
           const apiPath = url.pathname.replace(/\/+$/, '')
+          if (req.method === 'GET' && apiPath.endsWith('/dsh-tasks/api/next')) {
+            // Next upcoming fire times for a cron expression, so the editor can
+            // preview the schedule before saving. Uses croner (the same parser
+            // the schedule runs on); a paused probe never arms a real timer.
+            const cron = (url.searchParams.get('cron') || '').trim()
+            try {
+              validateCron(cron)
+              const probe = new Cron(cron, { paused: true })
+              const fires = probe.nextRuns(5).map((date) => date.toISOString())
+              probe.stop()
+              sendJson(res, 200, { fires })
+            } catch (error) {
+              sendJson(res, 400, { error: String((error && error.message) || error) })
+            }
+            return
+          }
           if (req.method === 'GET' && apiPath.endsWith('/dsh-tasks/api/workspaces')) {
             // Workspace options for the client form, served over HTTP so the
             // client half never depends on renderer-bound props hooks.

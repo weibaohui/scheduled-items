@@ -17,11 +17,20 @@ import { dirname, join } from 'node:path'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const sourcePath = join(here, '..', 'client', 'index.js')
+const helpersPath = join(here, '..', 'client', 'cron.js')
 const bundlePath = join(here, '..', 'client', 'bundle.js')
 
 const pkg = JSON.parse(readFileSync(join(here, '..', 'package.json'), 'utf8'))
 
 const source = readFileSync(sourcePath, 'utf8')
+
+// client/cron.js holds the dependency-free cron model helpers shared with the
+// node test suite. Inline it into the factory scope (dropping its node-only
+// export block, marked between the node-test-export comments) so the static
+// bundle stays self-contained while index.js and tests share one source.
+const helpers = readFileSync(helpersPath, 'utf8')
+  .replace(/\/\* node-test-export-start \*\/[\s\S]*?\/\* node-test-export-end \*\//, '')
+  .trim()
 
 const banner = `/* Generated from client/index.js by scripts/build-client.mjs — do not edit by hand.
  * Regenerate with: npm run build:client
@@ -42,12 +51,15 @@ const footer = `
 `
 
 // The dynamic source references the React global directly; in the static
-// bundle the factory's `var React` above satisfies it. Indent the wrapped
-// body uniformly for readability of the artifact.
-const indented = source
+// bundle the factory's `var React` above satisfies it. The inlined cron
+// helpers land in the same factory scope before the source body. Indent the
+// wrapped body uniformly for readability of the artifact.
+const indent = (code) => code
   .split('\n')
   .map((line) => (line.length === 0 ? line : '    ' + line))
   .join('\n')
 
-writeFileSync(bundlePath, banner + indented + footer)
-console.log(`built ${bundlePath} (${Buffer.byteLength(bundlePath === bundlePath ? banner + indented + footer : '', 'utf8')} bytes)`)
+const body = `${indent(helpers)}\n\n${indent(source)}`
+
+writeFileSync(bundlePath, banner + body + footer)
+console.log(`built ${bundlePath} (${Buffer.byteLength(banner + body + footer, 'utf8')} bytes)`)

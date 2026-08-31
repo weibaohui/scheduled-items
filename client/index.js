@@ -38,11 +38,40 @@ const ZH = {
   delete: '删除',
   running: '执行中…',
   runNow: '立即执行',
-  lastRun: '上次执行',
-  neverRun: '从未执行',
-  failed: '失败',
-  cronLabel: 'cron 定时器',
-  cronHint: 'croner 表达式，例如 "0 9 * * *" 表示每天 09:00。',
+      lastRun: '上次执行',
+      neverRun: '从未执行',
+      failed: '失败',
+      runHistory: '执行记录',
+      runOk: '成功',
+      runFail: '失败',
+      cronLabel: 'cron 定时器',
+      cronHint: '五段 croner 表达式（分 时 日 月 周），例如 "0 9 * * *" 表示每天 09:00。',
+      cronPresets: '快捷模板',
+      cronHourly: '每小时',
+      cronDaily: '每天',
+      cronWeekly: '每周',
+      cronCustom: '自定义',
+      cronAtMinute: '每小时的第',
+      cronMinuteUnit: '分',
+      cronEvery: '每隔',
+      cronMinutesUnit: '分钟',
+      cronAt: '时间',
+      presetHourly: '每小时整点',
+      presetMin30: '每 30 分钟',
+      presetDaily9: '每天 9:00',
+      presetWeekday830: '工作日 8:30',
+      presetMon10: '每周一 10:00',
+      wd1: '一', wd2: '二', wd3: '三', wd4: '四', wd5: '五', wd6: '六', wd0: '日',
+      wdWorkday: '工作日',
+      listSep: '、',
+      sumMin: '每 {n} 分钟执行一次',
+      sumHour: '每小时第 {m} 分执行',
+      sumDaily: '每天 {t} 执行',
+      sumWeekly: '每周{w} {t} 执行',
+      sumWeeklyWorkday: '工作日 {t} 执行',
+      sumCustom: '自定义表达式：{raw}',
+      sumEmpty: '选择或填写一个执行时间',
+      nextRuns: '最近 {n} 次执行',
   titleLabel: '标题',
   titlePlaceholder: '例如：晨会纪要',
   promptLabel: '提示词',
@@ -74,11 +103,40 @@ const EN = {
   delete: 'Delete',
   running: 'Running…',
   runNow: 'Run now',
-  lastRun: 'Last run',
-  neverRun: 'Never',
-  failed: 'failed',
-  cronLabel: 'Cron schedule',
-  cronHint: 'croner expression, e.g. "0 9 * * *" for 09:00 daily.',
+      lastRun: 'Last run',
+      neverRun: 'Never',
+      failed: 'failed',
+      runHistory: 'Run history',
+      runOk: 'ok',
+      runFail: 'failed',
+      cronLabel: 'Cron schedule',
+      cronHint: 'Five-field croner expression (min hour dom month dow), e.g. "0 9 * * *" for 09:00 daily.',
+      cronPresets: 'Quick presets',
+      cronHourly: 'Hourly',
+      cronDaily: 'Daily',
+      cronWeekly: 'Weekly',
+      cronCustom: 'Custom',
+      cronAtMinute: 'At minute',
+      cronMinuteUnit: 'past the hour',
+      cronEvery: 'Every',
+      cronMinutesUnit: 'minutes',
+      cronAt: 'At',
+      presetHourly: 'Every hour',
+      presetMin30: 'Every 30 min',
+      presetDaily9: 'Daily 9:00',
+      presetWeekday830: 'Weekdays 8:30',
+      presetMon10: 'Mondays 10:00',
+      wd1: 'Mo', wd2: 'Tu', wd3: 'We', wd4: 'Th', wd5: 'Fr', wd6: 'Sa', wd0: 'Su',
+      wdWorkday: 'weekday',
+      listSep: ', ',
+      sumMin: 'Every {n} minutes',
+      sumHour: 'At minute {m} past every hour',
+      sumDaily: 'Daily at {t}',
+      sumWeekly: 'Every {w} at {t}',
+      sumWeeklyWorkday: 'Weekdays at {t}',
+      sumCustom: 'Custom: {raw}',
+      sumEmpty: 'Pick or type a schedule',
+      nextRuns: 'Next {n} runs',
   titleLabel: 'Title',
   titlePlaceholder: 'e.g. Morning standup notes',
   promptLabel: 'Prompt',
@@ -144,7 +202,36 @@ styles.insert(`
 .si-rowTitle{font-size:14px;font-weight:600;color:var(--dsw-alias-label-primary)}
 .si-rowCron{font-size:12px;color:var(--dsw-alias-label-secondary);font-feature-settings:"tnum" 1}
 .si-rowMeta{font-size:12px;color:var(--dsw-alias-label-secondary)}
-.si-rowActions{display:flex;gap:8px;flex-shrink:0}
+    .si-rowActions{display:flex;gap:8px;flex-shrink:0}
+    .si-runsToggle{align-self:flex-start;margin-top:2px;padding:0;border:none;background:transparent;color:var(--dsw-alias-brand-primary);font-size:12px;cursor:pointer}
+    .si-runsToggle:hover{text-decoration:underline}
+    .si-runs{list-style:none;margin:6px 0 0;padding:8px 0 0;border-top:1px solid var(--dsw-alias-border-l2);display:flex;flex-direction:column;gap:3px}
+    .si-run{display:flex;gap:8px;align-items:baseline;font-size:12px;color:var(--dsw-alias-label-secondary);font-feature-settings:"tnum" 1}
+    .si-runTime{color:var(--dsw-alias-label-secondary)}
+    .si-runOk{color:var(--dsw-alias-label-secondary)}
+    .si-runFail{color:var(--dsw-alias-state-error-primary);word-break:break-word}
+    .si-runSession{color:var(--dsw-alias-label-tertiary,var(--dsw-alias-label-secondary));font-size:11px}
+
+    /* Cron picker: preset chips, frequency segment, per-mode fields, summary. */
+    .si-cron{display:flex;flex-direction:column;gap:9px;width:100%}
+    .si-chips{display:flex;flex-wrap:wrap;gap:6px}
+    .si-chip{font-size:12px;padding:4px 11px;border-radius:999px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);cursor:pointer;transition:background .14s,border-color .14s,color .14s}
+    .si-chip:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-label-primary)}
+    .si-seg{display:inline-flex;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;overflow:hidden;align-self:flex-start}
+    .si-seg button{border:none;background:transparent;color:var(--dsw-alias-label-secondary);padding:5px 14px;font-size:12px;cursor:pointer;border-right:1px solid var(--dsw-alias-border-l2);transition:background .14s,color .14s}
+    .si-seg button:last-child{border-right:none}
+    .si-seg button.on{background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base)}
+    .si-cronRow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--dsw-alias-label-secondary)}
+    .si-cronRow select{padding:6px 8px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font-size:13px;font-family:inherit;font-feature-settings:"tnum" 1}
+    .si-days{display:flex;gap:5px}
+    .si-day{min-width:32px;height:30px;padding:0 6px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);font-size:12px;cursor:pointer;transition:background .14s,border-color .14s,color .14s}
+    .si-day:hover{border-color:var(--dsw-alias-brand-primary)}
+    .si-day.on{background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base);border-color:transparent}
+    .si-sum{font-size:12px;color:var(--dsw-alias-brand-primary)}
+    .si-next{display:flex;flex-direction:column;gap:4px}
+    .si-nextLabel{font-size:12px;color:var(--dsw-alias-label-secondary)}
+    .si-nextList{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+    .si-nextList li{font-size:12px;color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:6px;padding:2px 8px;font-feature-settings:"tnum" 1}
 
 /* Base button: secondary outline. Hover overlay mixes from label-primary so
    light/dark themes both produce a visible but subtle state change. */
@@ -224,7 +311,160 @@ module.exports = {
       ctx.effect(() => locale.register(LOCALE_NS, LOCALE_DICT))
     }
 
-    const emptyForm = () => ({ editingId: null, title: '', prompt: '', cron: '', enabled: true })
+        const emptyForm = () => ({ editingId: null, title: '', prompt: '', cron: '', enabled: true })
+
+        // CronPicker's pure helpers (parseCron / buildCron / CRON_PRESETS /
+        // HOURLY_STEPS / WEEKDAY_KEYS) live in client/cron.js; build-client.mjs
+        // inlines them into the static bundle, so this source reads them from
+        // the enclosing factory scope and stays dependency-free.
+        const MODES = [['hourly', 'cronHourly'], ['daily', 'cronDaily'], ['weekly', 'cronWeekly'], ['custom', 'cronCustom']]
+        const HOURS = Array.from({ length: 24 }, (_, i) => i)
+        const MINUTES = Array.from({ length: 60 }, (_, i) => i)
+        const pad2 = (n) => String(n).padStart(2, '0')
+
+        /**
+         * Structured cron editor. Controlled (value/onChange are the cron
+         * string); offers one-click presets, a frequency segment with
+         * mode-specific fields, and a raw custom mode. Renders a live
+         * human-readable summary. Expressions the model cannot represent round
+         * trip through custom mode without data loss.
+         */
+        function CronPicker({ value, onChange, disabled }) {
+          const h = React.createElement
+          const [model, setModel] = React.useState(() => parseCron(value))
+          const [fires, setFires] = React.useState([])
+          React.useEffect(() => { setModel(parseCron(value)) }, [value])
+          // Preview the next few fire times (computed by croner on the host) so
+          // the chosen schedule can be confirmed before saving. Debounced so
+          // typing in custom mode doesn't fire a request per keystroke.
+          React.useEffect(() => {
+            const cron = String(value || '').trim()
+            if (!cron) { setFires([]); return undefined }
+            let cancelled = false
+            const timer = setTimeout(() => {
+              fetch(`${API}/next?cron=${encodeURIComponent(cron)}`)
+                .then((r) => (r.ok ? r.json() : Promise.reject(new Error('bad cron'))))
+                .then((p) => { if (!cancelled) setFires(p.fires || []) })
+                .catch(() => { if (!cancelled) setFires([]) })
+            }, 250)
+            return () => { cancelled = true; clearTimeout(timer) }
+          }, [value])
+          // New-item forms mount with an empty cron: seed a sensible default so
+          // the form is immediately valid and the picker never shows nothing.
+          React.useEffect(() => {
+            if (!value || !String(value).trim()) onChange(buildCron(parseCron('')))
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+          }, [])
+
+          const emit = (next) => {
+            setModel(next)
+            const cron = buildCron(next)
+            if (cron) onChange(cron)
+          }
+          const setMode = (mode) => {
+            if (mode === model.mode) return
+            if (mode === 'hourly') emit({ mode, step: 60, minute: model.minute ?? 0 })
+            else if (mode === 'daily') emit({ mode, hour: model.hour ?? 9, minute: model.minute ?? 0 })
+            else if (mode === 'weekly') emit({ mode, hour: model.hour ?? 9, minute: model.minute ?? 0, days: model.days && model.days.length ? model.days : [1, 2, 3, 4, 5] })
+            else { const raw = buildCron(model) || '0 9 * * *'; setModel({ mode, raw }); onChange(raw) }
+          }
+          const toggleDay = (day) => {
+            const current = model.days || []
+            const next = current.includes(day)
+              ? current.filter((d) => d !== day)
+              : WEEKDAY_KEYS.filter((d) => current.includes(d) || d === day)
+            if (next.length === 0) return // keep at least one weekday
+            emit({ ...model, days: next })
+          }
+
+          const time = `${pad2(model.hour ?? 9)}:${pad2(model.minute ?? 0)}`
+          let summary
+          if (model.mode === 'hourly') {
+            summary = (model.step && model.step < 60)
+              ? t('sumMin').replace('{n}', model.step)
+              : t('sumHour').replace('{m}', pad2(model.minute ?? 0))
+          } else if (model.mode === 'daily') {
+            summary = t('sumDaily').replace('{t}', time)
+          } else if (model.mode === 'weekly') {
+            const days = model.days || []
+            const isWorkday = days.length === 5 && [1, 2, 3, 4, 5].every((d) => days.includes(d))
+            const w = isWorkday ? '' : days.map((d) => t('wd' + d)).join(t('listSep'))
+            summary = t(isWorkday ? 'sumWeeklyWorkday' : 'sumWeekly')
+              .replace('{w}', w)
+              .replace('{t}', time)
+          } else {
+            summary = model.raw ? t('sumCustom').replace('{raw}', model.raw) : t('sumEmpty')
+          }
+
+          const timeSelects = h(React.Fragment, null,
+            h('select', {
+              'aria-label': t('cronAt'), value: model.hour ?? 9, disabled,
+              onChange: (e) => emit({ ...model, hour: Number(e.target.value) }),
+            }, HOURS.map((n) => h('option', { key: n, value: n }, pad2(n)))),
+            h('span', null, ':'),
+            h('select', {
+              'aria-label': t('cronAtMinute'), value: model.minute ?? 0, disabled,
+              onChange: (e) => emit({ ...model, minute: Number(e.target.value) }),
+            }, MINUTES.map((n) => h('option', { key: n, value: n }, pad2(n))))
+          )
+
+          return h('div', { className: 'si-cron' },
+            h('div', { className: 'si-chips' },
+              CRON_PRESETS.map((preset) => h('button', {
+                key: preset.id, type: 'button', className: 'si-chip', disabled,
+                onClick: () => onChange(preset.cron),
+              }, t('preset' + preset.id.charAt(0).toUpperCase() + preset.id.slice(1))))
+            ),
+            h('div', { className: 'si-seg', role: 'tablist' },
+              MODES.map(([mode, key]) => h('button', {
+                key: mode, type: 'button', role: 'tab',
+                'aria-pressed': model.mode === mode, disabled,
+                className: model.mode === mode ? 'on' : '',
+                onClick: () => setMode(mode),
+              }, t(key)))
+            ),
+            model.mode === 'hourly' && h('div', { className: 'si-cronRow' },
+              h('span', null, t('cronEvery')),
+              h('select', {
+                value: model.step ?? 60, disabled,
+                onChange: (e) => emit({ mode: 'hourly', step: Number(e.target.value), ...(Number(e.target.value) === 60 ? { minute: model.minute ?? 0 } : {}) }),
+              }, HOURLY_STEPS.map((s) => h('option', { key: s, value: s }, s === 60 ? '1' : String(s)))),
+              (model.step ?? 60) === 60 && h(React.Fragment, null,
+                h('span', null, t('cronAtMinute')),
+                h('select', {
+                  value: model.minute ?? 0, disabled,
+                  onChange: (e) => emit({ ...model, minute: Number(e.target.value) }),
+                }, MINUTES.map((n) => h('option', { key: n, value: n }, pad2(n)))),
+                h('span', null, t('cronMinuteUnit'))
+              ),
+              (model.step ?? 60) !== 60 && h('span', null, t('cronMinutesUnit'))
+            ),
+            (model.mode === 'daily' || model.mode === 'weekly') && h('div', { className: 'si-cronRow' },
+              model.mode === 'weekly' && h('div', { className: 'si-days' },
+                WEEKDAY_KEYS.map((day) => h('button', {
+                  key: day, type: 'button', className: (model.days || []).includes(day) ? 'si-day on' : 'si-day',
+                  'aria-pressed': (model.days || []).includes(day), disabled,
+                  onClick: () => toggleDay(day),
+                }, t('wd' + day)))
+              ),
+              timeSelects
+            ),
+            model.mode === 'custom' && h('input', {
+              value: model.raw || '', disabled, placeholder: '0 9 * * *', spellCheck: false,
+              onChange: (e) => { const raw = e.target.value; setModel({ mode: 'custom', raw }); onChange(raw) },
+            }),
+            h('div', { className: 'si-sum' }, summary),
+            fires.length > 0 && h('div', { className: 'si-next' },
+              h('span', { className: 'si-nextLabel' }, t('nextRuns').replace('{n}', fires.length)),
+              h('ul', { className: 'si-nextList' },
+                fires.map((iso, i) => h('li', { key: i },
+                  new Date(iso).toLocaleString(undefined, { weekday: 'short', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                ))
+              )
+            )
+          )
+        }
+
 
     /**
      * The management surface. Component-local state, zero renderer-bound
@@ -237,9 +477,10 @@ module.exports = {
       const [loading, setLoading] = React.useState(false)
       const [error, setError] = React.useState(null)
       const [form, setForm] = React.useState(null)
-      const [saving, setSaving] = React.useState(false)
-      const [runningId, setRunningId] = React.useState(null)
-      const [workspaces, setWorkspaces] = React.useState([])
+          const [saving, setSaving] = React.useState(false)
+          const [runningId, setRunningId] = React.useState(null)
+          const [historyId, setHistoryId] = React.useState(null)
+          const [workspaces, setWorkspaces] = React.useState([])
 
       const load = async () => {
         setLoading(true)
@@ -337,11 +578,29 @@ module.exports = {
         React.createElement('ul', { className: 'si-list' },
           items.map((item) =>
             React.createElement('li', { key: item.id, className: 'si-row' },
-              React.createElement('div', { className: 'si-rowMain' },
-                React.createElement('span', { className: 'si-rowTitle' }, item.title),
-                React.createElement('span', { className: 'si-rowCron' }, item.cron),
-                React.createElement('span', { className: 'si-rowMeta' }, rowMeta(item))
-              ),
+                  React.createElement('div', { className: 'si-rowMain' },
+                    React.createElement('span', { className: 'si-rowTitle' }, item.title),
+                    React.createElement('span', { className: 'si-rowCron' }, item.cron),
+                    React.createElement('span', { className: 'si-rowMeta' }, rowMeta(item)),
+                    (item.runs && item.runs.length > 0) && React.createElement(React.Fragment, null,
+                      React.createElement('button', {
+                        type: 'button',
+                        className: 'si-runsToggle',
+                        onClick: () => setHistoryId(historyId === item.id ? null : item.id),
+                        'aria-expanded': historyId === item.id,
+                      }, `${t('runHistory')} (${item.runs.length})`),
+                      historyId === item.id && React.createElement('ul', { className: 'si-runs' },
+                        [...item.runs].reverse().map((run, idx) =>
+                          React.createElement('li', { key: idx, className: 'si-run' },
+                            React.createElement('span', { className: 'si-runTime' }, new Date(run.at).toLocaleString()),
+                            run.ok
+                              ? React.createElement('span', { className: 'si-runOk' }, t('runOk'))
+                              : React.createElement('span', { className: 'si-runFail' }, `${t('runFail')}: ${run.error || ''}`)
+                          )
+                        )
+                      )
+                    )
+                  ),
               React.createElement('div', { className: 'si-rowActions' },
                 React.createElement('button', {
                   type: 'button',
@@ -403,16 +662,15 @@ module.exports = {
                 onChange: (e) => setForm({ ...form, prompt: e.target.value }),
               })
             ),
-            React.createElement('label', { className: 'si-field' },
-              React.createElement('span', null, t('cronLabel')),
-              React.createElement('input', {
-                value: form.cron,
-                disabled,
-                placeholder: '0 9 * * *',
-                onChange: (e) => setForm({ ...form, cron: e.target.value }),
-              }),
-              React.createElement('small', { className: 'si-hint' }, t('cronHint'))
-            ),
+                React.createElement('div', { className: 'si-field' },
+                  React.createElement('span', null, t('cronLabel')),
+                  React.createElement(CronPicker, {
+                    value: form.cron,
+                    disabled,
+                    onChange: (cron) => setForm({ ...form, cron }),
+                  }),
+                  React.createElement('small', { className: 'si-hint' }, t('cronHint'))
+                ),
             workspaceOptions.length > 0 && React.createElement('label', { className: 'si-field' },
               React.createElement('span', null, t('workspaceLabel')),
               React.createElement('select', {
