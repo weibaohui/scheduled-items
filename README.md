@@ -2,6 +2,25 @@
 
 DeepSeek Harness 插件：**cron 定时事项**。每个事项包含标题、提示词、croner 表达式，可绑定一个工作区；定时或立即执行时，在一个全新的 agent 会话中提交提示词（绑定工作区时会话跑在该工作区目录下并挂到该工作区分组）。带全屏管理界面（列表 + 增删改查 + 立即执行）。
 
+
+## 安装
+
+```bash
+dsh plugin --profile web add @weibaohui/scheduled-items -w
+```
+
+装完重启 `dsh web` 即生效。
+
+## 发版（维护者）
+
+```bash
+npm version patch            # bump + commit + tag
+git push --follow-tags
+gh release create vX.Y.Z --generate-notes   # 创建 Release 触发自动发布到 npm
+```
+
+发布由 GitHub Actions 完成（Release published 触发；打 tag 不发布），走 npm Trusted Publishing 免 token。
+
 ## 安装
 
 ### 通过 `dsh plugin add`（推荐，GitHub 或 npm）
