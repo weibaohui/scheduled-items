@@ -9,4 +9,4 @@
 
 - insert:
     - id: scheduled-items
-      name: 'dsh-plugin-scheduled-items'
+      name: '@weibaohui/scheduled-items'
