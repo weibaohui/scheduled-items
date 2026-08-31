@@ -54,8 +54,8 @@ test('item schema rejects a record missing required fields', () => {
   assert.equal(itemSchema.safeParse(broken).success, false)
 })
 
-test('domain spec declares the items table under the scheduled_items unit', () => {
-  assert.equal(domainSpec.name, 'scheduled_items')
+test('domain spec declares the items table under the dsh_tasks unit', () => {
+  assert.equal(domainSpec.name, 'dsh_tasks')
   assert.equal(domainSpec.version, 1)
   assert.equal(typeof domainSpec.tables.items.valueSchema, 'object')
   assert.equal(domainSpec.tables.items.valueSchema, itemSchema)

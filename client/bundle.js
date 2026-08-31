@@ -2,7 +2,7 @@
  * Regenerate with: npm run build:client
  */
 window.__ModuleLoader__.load({
-  id: "@weibaohui/scheduled-items",
+  id: "@weibaohui/dsh-tasks",
   factory: (require) => {
     var module = { exports: {} }
     var exports = module.exports
@@ -16,9 +16,9 @@ window.__ModuleLoader__.load({
      * Registers a `settings.section` management page and a `sidebar.footer.action`
      * button opening the same surface as a full-page overlay. Both render over
      * one component-local store; data arrives from the Host half through plain
-     * `fetch` on `/scheduled-items/api` (the bundle runs in the real page, not a
+     * `fetch` on `/dsh-tasks/api` (the bundle runs in the real page, not a
      * sandbox). Workspace options are fetched from the Host's
-     * `/scheduled-items/api/workspaces` route.
+     * `/dsh-tasks/api/workspaces` route.
      *
      * Components are zero-argument closures — they never read renderer-bound
      * props hooks — so the bundle works in any harness client runtime that
@@ -30,7 +30,7 @@ window.__ModuleLoader__.load({
      * the static-install artifact regenerated from it via `npm run build:client`.
      */
 
-    const LOCALE_NS = 'settings.scheduledItems'
+    const LOCALE_NS = 'settings.dshTasks'
 
     const ZH = {
       nav: '定时事项',
@@ -106,7 +106,7 @@ window.__ModuleLoader__.load({
 
     const LOCALE_DICT = { zh: ZH, en: EN }
 
-    const API = '/scheduled-items/api'
+    const API = '/dsh-tasks/api'
 
     const styles = {
       _head: null,
@@ -219,7 +219,7 @@ window.__ModuleLoader__.load({
     }
 
     module.exports = {
-      name: '@weibaohui/scheduled-items',
+      name: '@weibaohui/dsh-tasks',
       // Only `slots` is a resolvable service in the static bundle environment;
       // `locale` is resolved dynamically below so the plugin never waits on a
       // service name the web module loader does not serve.
@@ -483,7 +483,7 @@ window.__ModuleLoader__.load({
         slots.inject('settings.section', () => slots.register(
           {
             name: 'settings.section',
-            id: 'scheduled-items',
+            id: '@weibaohui/dsh-tasks',
             order: 30,
             label: () => t('nav'),
             locale: LOCALE_NS,
@@ -495,7 +495,7 @@ window.__ModuleLoader__.load({
         slots.inject('sidebar.footer.action', () => slots.register(
           {
             name: 'sidebar.footer.action',
-            id: 'scheduled-items',
+            id: '@weibaohui/dsh-tasks',
             order: 30,
             locale: LOCALE_NS,
           },

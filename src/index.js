@@ -1,13 +1,13 @@
 'use strict'
 
 /**
- * dsh-plugin-scheduled-items — Host half
+ * dsh-tasks — Host half
  *
  * Durable cron-driven prompts. Each item carries a title, a prompt, and a
  * croner expression; an enabled item spawns a fresh agent session and
  * submits the prompt on schedule (or on demand). The store is durable
  * through the host `storageDomain` service (domain `scheduled_items`), the
- * schedule runs on croner, and an HTTP API under `/scheduled-items/api`
+ * schedule runs on croner, and an HTTP API under `/dsh-tasks/api`
  * serves the management pages in the web client.
  *
  * Zero `@deepseek-ai/dsh-*` imports: every harness capability is reached
@@ -34,9 +34,9 @@ const itemSchema = z.object({
   lastRunError: z.string().optional(),
 })
 
-/** The scheduled-items domain: one `items` table keyed by item id. */
+/** The dsh-tasks domain: one `items` table keyed by item id. */
 const domainSpec = {
-  name: 'scheduled_items',
+  name: 'dsh_tasks',
   version: 1,
   tables: { items: { valueSchema: itemSchema } },
 }
@@ -82,7 +82,7 @@ function buildRecord(input) {
 }
 
 module.exports = {
-  name: 'scheduled-items',
+  name: 'dsh-tasks',
   inject: ['storageDomain', 'agents', 'agentDefaultModel', 'webServer', 'workspaceRegistry', 'sessionTitle'],
 
   // Exposed for the offline test suite only (test/*.test.mjs); Cordis
@@ -183,7 +183,7 @@ module.exports = {
           id: randomUUID(),
           role: 'user',
           content: [{ type: 'text', text: record.prompt }],
-          source: { kind: 'plugin', plugin: 'scheduled-items' },
+          source: { kind: 'plugin', plugin: 'dsh-tasks' },
         }
         handle.agent.followup(message)
         return { ...record, lastRunAt: startedAt, lastRunError: undefined }
@@ -287,7 +287,7 @@ module.exports = {
         for (const job of jobs.values()) job.stop()
         jobs.clear()
         domain.close().catch(() => {})
-      }, 'scheduled-items: domain close')
+      }, 'dsh-tasks: domain close')
       table = domain.table('items')
       rescheduleAll()
     })()
@@ -295,12 +295,12 @@ module.exports = {
     // ── HTTP API under the registered prefix ─────────────────────────────────
     ctx.effect(() => ctx.webServer.register({
       kind: 'prefix',
-      path: '/scheduled-items/api',
+      path: '/dsh-tasks/api',
       handler: async (req, res) => {
         try {
           const url = new URL(req.url || '/', 'http://dsh.local')
           const apiPath = url.pathname.replace(/\/+$/, '')
-          if (req.method === 'GET' && apiPath.endsWith('/scheduled-items/api/workspaces')) {
+          if (req.method === 'GET' && apiPath.endsWith('/dsh-tasks/api/workspaces')) {
             // Workspace options for the client form, served over HTTP so the
             // client half never depends on renderer-bound props hooks.
             const registry = ctx.get('workspaceRegistry')
@@ -310,16 +310,16 @@ module.exports = {
             sendJson(res, 200, { workspaces })
             return
           }
-          if (req.method === 'GET' && apiPath.endsWith('/scheduled-items/api')) {
+          if (req.method === 'GET' && apiPath.endsWith('/dsh-tasks/api')) {
             sendJson(res, 200, { items: list() })
             return
           }
-          if (req.method === 'POST' && apiPath.endsWith('/scheduled-items/api')) {
+          if (req.method === 'POST' && apiPath.endsWith('/dsh-tasks/api')) {
             const item = await create(await readJsonBody(req))
             sendJson(res, 201, { item })
             return
           }
-          if (req.method === 'PATCH' && apiPath.endsWith('/scheduled-items/api')) {
+          if (req.method === 'PATCH' && apiPath.endsWith('/dsh-tasks/api')) {
             const body = await readJsonBody(req)
             if (typeof body.id !== 'string') {
               sendJson(res, 400, { error: 'body must provide id' })
@@ -330,7 +330,7 @@ module.exports = {
             sendJson(res, 200, { item })
             return
           }
-          if (req.method === 'DELETE' && apiPath.endsWith('/scheduled-items/api')) {
+          if (req.method === 'DELETE' && apiPath.endsWith('/dsh-tasks/api')) {
             const body = await readJsonBody(req)
             if (typeof body.id !== 'string') {
               sendJson(res, 400, { error: 'body must provide id' })
@@ -340,7 +340,7 @@ module.exports = {
             sendJson(res, 200, { removed: true })
             return
           }
-          if (req.method === 'POST' && apiPath.endsWith('/scheduled-items/api/run')) {
+          if (req.method === 'POST' && apiPath.endsWith('/dsh-tasks/api/run')) {
             const body = await readJsonBody(req)
             if (typeof body.id !== 'string') {
               sendJson(res, 400, { error: 'body must provide id' })
@@ -355,6 +355,6 @@ module.exports = {
           sendJson(res, 400, { error: String((error && error.message) || error) })
         }
       },
-    }), 'scheduled-items: api route')
+    }), 'dsh-tasks: api route')
   },
 }

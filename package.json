@@ -1,6 +1,6 @@
 {
-  "name": "@weibaohui/scheduled-items",
-  "version": "0.1.1",
+  "name": "@weibaohui/dsh-tasks",
+  "version": "0.2.0",
   "description": "DeepSeek Harness plugin: cron-driven scheduled items. Each item carries a title, a prompt, and a croner expression; executions spawn a fresh agent session in a bound workspace (or the default cwd) and run on schedule or on demand. Includes a full-page management UI.",
   "license": "MIT",
   "keywords": [
@@ -53,11 +53,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/weibaohui/scheduled-items.git"
+    "url": "git+https://github.com/weibaohui/dsh-tasks.git"
   },
-  "homepage": "https://github.com/weibaohui/scheduled-items#readme",
+  "homepage": "https://github.com/weibaohui/dsh-tasks#readme",
   "bugs": {
-    "url": "https://github.com/weibaohui/scheduled-items/issues"
+    "url": "https://github.com/weibaohui/dsh-tasks/issues"
   },
   "publishConfig": {
     "access": "public"

@@ -1,99 +1,39 @@
-# dsh-plugin-scheduled-items
+# @weibaohui/dsh-tasks
 
-DeepSeek Harness 插件：**cron 定时事项**。每个事项包含标题、提示词、croner 表达式，可绑定一个工作区；定时或立即执行时，在一个全新的 agent 会话中提交提示词（绑定工作区时会话跑在该工作区目录下并挂到该工作区分组）。带全屏管理界面（列表 + 增删改查 + 立即执行）。
+[![DSH plugin](https://img.shields.io/badge/dsh-plugin-✅-green)](https://github.com/topics/dsh-plugin)
+[![npm version](https://img.shields.io/npm/v/@weibaohui/dsh-tasks)](https://www.npmjs.com/package/@weibaohui/dsh-tasks)
 
+**定时任务插件**：用 cron 表达式定时执行提示词——到点自动开一个新 agent 会话替你干活，也可以随时手动立即执行。
+
+## 核心功能
+
+- **cron 定时执行**：每个任务 = 标题 + 提示词 + cron 表达式；到点自动新建 agent 会话并提交提示词，执行结果出现在侧栏对应工作区下
+- **手动立即执行**：任意任务可一键「立即运行」，不必等 cron 到点
+- **绑定工作区**（可选）：任务可指定工作区，会话自动挂到该工作区并继承其目录
+- **会话自动命名**：执行出的会话以任务标题命名，侧栏一眼可辨
+- **完整管理界面**：全屏管理页——新建/编辑/启用停用/删除/立即执行，一页搞定
+- **cron 校验**：保存时即时校验表达式，写错进不来
+- **执行留痕**：每个任务记录最近一次执行时间与失败原因
 
 ## 安装
 
 ```bash
-dsh plugin --profile web add @weibaohui/scheduled-items -w
+dsh plugin --profile web add @weibaohui/dsh-tasks -w
 ```
 
 装完重启 `dsh web` 即生效。
 
-## 发版（维护者）
+## 使用
 
-```bash
-npm version patch            # bump + commit + tag
-git push --follow-tags
-gh release create vX.Y.Z --generate-notes   # 创建 Release 触发自动发布到 npm
-```
+1. 打开 Web UI → 侧栏底部 **定时任务** 按钮，进入管理页（设置页也有同款面板）
+2. **新建任务**：填标题、提示词、cron 表达式（如 `0 9 * * 1-5` 工作日每天 9 点），选择是否绑定工作区
+3. 启用后按 cron 自动执行；列表里可随时 **立即执行**、编辑、停用或删除
+4. 执行产生的会话在侧栏对应工作区下可见，点进去查看 agent 干活的过程与结果
 
-发布由 GitHub Actions 完成（Release published 触发；打 tag 不发布），走 npm Trusted Publishing 免 token。
+## 示例
 
-## 安装
-
-### 通过 `dsh plugin add`（推荐，GitHub 或 npm）
-
-从插件合集仓库的子目录安装（`#path:` 指向子目录，引号防止 shell 展开）：
-
-```bash
-dsh plugin --profile web add 'github:weibaohui/dsh-plugins#path:scheduled-items' -w
-```
-
-或从本插件独立仓库安装：
-
-```bash
-dsh plugin --profile web add github:weibaohui/dsh-plugin-scheduled-items -w
-```
-
-或发布到 npm 后：
-
-```bash
-dsh plugin --profile web add dsh-plugin-scheduled-items -w
-```
-
-`dsh plugin` 会在 profile 目录转发给 pnpm，并将包调和进 profile 的 bundle 列表（`dsh.profile.bundles`）。包内 `cordis.patch.yml`（经 `package.json` 的 `dsh.bundle.patch` 声明）随后把插件行插入宿主组合；`dsh.client` 声明则让 web 外壳加载 `client/bundle.js` 作为管理界面。
-
-### 作为组合插件（持久化，手动）
-
-在你的 profile 的宿主组合（`cordis.patch.yml`）中添加：
-
-```yaml
-- insert:
-    - id: scheduled-items
-      name: 'dsh-plugin-scheduled-items'
-```
-
-或不安装包、以相对路径指向本仓库。本插件属于 **Host 平面**：它读取 Host 的 `storageDomain`、`workspaceRegistry`、`agents`、`agentDefaultModel`、`webServer` 服务，并注册设置页与全屏管理界面，因此应放在**宿主组合**中，而不是某个 agent preset 内。
-
-### 作为动态插件（开发 / 会话级）
-
-`code.host` 的函数体即 `src/index.js` 去掉 `module.exports` 包装；`code.client` 的函数体即 `client/index.js` 去掉包装。
-
-## 功能
-
-- **事项 CRUD**：标题、提示词、cron 表达式、启用开关、绑定工作区。
-- **立即执行 / 定时执行**：执行时新建 agent 会话并提交提示词（croner 调度）。
-- **工作区归属**：绑定工作区的事项，执行会话 cwd = 工作区路径，且 `workspace.attachSession()` 挂到该工作区分组。
-- **持久化**：走 storage-domain（domain `scheduled_items`）；web 组合可将其路由到 SQLite 后端。
-- **管理界面**：侧边栏底部「定时事项」按钮打开全屏管理页；设置页也有同一管理面。
-
-## HTTP API
-
-Host 半端在 `/scheduled-items/api` 注册一个 prefix route：
-
-| 方法 | 路径 | body | 返回 |
-|---|---|---|---|
-| GET | `/scheduled-items/api` | — | `{ items }` |
-| POST | `/scheduled-items/api` | `{ title, prompt, cron, enabled, workspaceId? }` | `{ item }` |
-| PATCH | `/scheduled-items/api` | `{ id, ...patch }` | `{ item }` |
-| DELETE | `/scheduled-items/api` | `{ id }` | `{ removed: true }` |
-| POST | `/scheduled-items/api/run` | `{ id }` | `{ item }` |
-
-## 开发
-
-```bash
-npm install
-npm run check    # 语法检查两个半端
-npm test         # 离线测试套件
-npm run build:client   # 从 client/index.js 构建 client/bundle.js
-```
-
-## 依赖
-
-运行时只依赖普通 npm 包：`croner`（调度）、`zod`（记录 schema）。不依赖任何 `@deepseek-ai/dsh-*` 包——Host 半端通过 `ctx.*` 运行时服务访问 harness 能力，因此不受 npm 上 dsh 包发布进度影响。
-
-## License
-
-MIT
+| 场景 | 提示词示例 | cron |
+|---|---|---|
+| 每天早上整理待办 | 「汇总我昨天的会话，整理今日待办清单」 | `0 9 * * *` |
+| 工作日晚间日报 | 「总结今天的代码提交与会议要点，输出日报」 | `0 18 * * 1-5` |
+| 每周知识沉淀 | 「回顾本周对话，把可复用的经验整理成文档」 | `0 20 * * 5` |

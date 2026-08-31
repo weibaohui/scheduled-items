@@ -1,4 +1,4 @@
-# dsh-plugin-scheduled-items bundle patch: contributes the plugin row into the
+# dsh-tasks bundle patch: contributes the plugin row into the
 # host composition when this package is installed via `dsh plugin add`.
 #
 # The plugin is HOST-PLANE: it reads host services (storageDomain,
@@ -8,5 +8,5 @@
 # in the host composition (this insert), never inside an agent preset.
 
 - insert:
-    - id: scheduled-items
-      name: '@weibaohui/scheduled-items'
+    - id: dsh-tasks
+      name: '@weibaohui/dsh-tasks'
