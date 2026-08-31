@@ -11,7 +11,7 @@ window.__ModuleLoader__.load({
     'use strict'
 
     /**
-     * dsh-plugin-scheduled-items — Client half
+     * dsh-tasks — Client half
      *
      * Registers a `settings.section` management page and a `sidebar.footer.action`
      * button opening the same surface as a full-page overlay. Both render over
@@ -23,7 +23,7 @@ window.__ModuleLoader__.load({
      * Components are zero-argument closures — they never read renderer-bound
      * props hooks — so the bundle works in any harness client runtime that
      * serves the `slots` service. UI text is localized through the harness
-     * `locale` service (namespace `settings.scheduledItems`) when present,
+     * `locale` service (namespace `settings.dshTasks`) when present,
      * falling back to raw keys otherwise.
      *
      * This file is the dynamic-plugin source of truth; `client/bundle.js` is
@@ -73,7 +73,7 @@ window.__ModuleLoader__.load({
       title: 'Scheduled items',
       intro: 'Prompt a fresh agent session on a cron schedule — or run it right now.',
       loading: 'Loading scheduled items…',
-      error: 'Could not reach the scheduled-items service.',
+      error: 'Could not reach the dsh-tasks service.',
       empty: 'No scheduled items yet. Create your first one below.',
       retry: 'Retry',
       newItem: 'New scheduled item',
@@ -114,7 +114,7 @@ window.__ModuleLoader__.load({
         if (typeof document === 'undefined') return
         if (!this._head) {
           const style = document.createElement('style')
-          style.setAttribute('data-plugin', 'dsh-plugin-scheduled-items')
+          style.setAttribute('data-plugin', 'dsh-tasks')
           document.head.appendChild(style)
           this._head = style
         }
@@ -124,7 +124,7 @@ window.__ModuleLoader__.load({
 
     styles.insert(`
     /*
-     * Theme-aware styles for dsh-plugin-scheduled-items.
+     * Theme-aware styles for dsh-tasks.
      *
      * Every color comes from the harness theme tokens (Theme.listTokens). Tokens
      * that do not exist there (button-primary-fill / interactive-bg-hover /
