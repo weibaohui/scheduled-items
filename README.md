@@ -1,6 +1,6 @@
 # @weibaohui/dsh-tasks
 
-[![DSH plugin](https://img.shields.io/badge/dsh-plugin-✅-green)](https://github.com/topics/dsh-plugin)
+[![DSH plugin](https://img.shields.io/badge/dsh-plugin-green)](https://github.com/topics/dsh-plugin)
 [![npm version](https://img.shields.io/npm/v/@weibaohui/dsh-tasks)](https://www.npmjs.com/package/@weibaohui/dsh-tasks)
 
 **定时任务插件**：用 cron 表达式定时执行提示词——到点自动开一个新 agent 会话替你干活，也可以随时手动立即执行。
