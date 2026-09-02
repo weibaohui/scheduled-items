@@ -315,16 +315,20 @@ module.exports = {
     }
 
     // ── lifecycle: open the domain and reschedule every enabled item ─────────
-    ;(async () => {
-      const domain = await ctx.storageDomain.open(domainSpec)
-      ctx.effect(() => () => {
-        for (const job of jobs.values()) job.stop()
-        jobs.clear()
-        domain.close().catch(() => {})
-      }, 'dsh-tasks: domain close')
+    // The cleanup effect must be registered synchronously while the plugin's
+    // cordis fiber is still active: calling ctx.effect() after an await (inside
+    // an async IIFE) throws "cannot create effect on inactive context" and
+    // takes the whole host boot down with it.
+    const domainPromise = ctx.storageDomain.open(domainSpec)
+    ctx.effect(() => () => {
+      for (const job of jobs.values()) job.stop()
+      jobs.clear()
+      domainPromise.then((domain) => domain.close()).catch(() => {})
+    }, 'dsh-tasks: domain close')
+    void domainPromise.then((domain) => {
       table = domain.table('items')
       rescheduleAll()
-    })()
+    })
 
     // ── HTTP API under the registered prefix ─────────────────────────────────
     ctx.effect(() => ctx.webServer.register({
