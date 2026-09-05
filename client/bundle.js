@@ -150,10 +150,9 @@ window.__ModuleLoader__.load({
     /**
      * dsh-tasks — Client half
      *
-     * Registers a `settings.section` — the management surface lives in the
-     * settings window (pair it with dsh-settings-ui to size it up). It renders
-     * over one component-local store; data arrives from the Host half through plain
-     * `fetch` on `/dsh-tasks/api` (the bundle runs in the real page, not a
+     * Registers a `settings.section` management page. The same surface renders
+     * inside the harness settings panel; data arrives from the Host half through
+     * plain `fetch` on `/dsh-tasks/api` (the bundle runs in the real page, not a
      * sandbox). Workspace options are fetched from the Host's
      * `/dsh-tasks/api/workspaces` route.
      *
@@ -411,7 +410,6 @@ window.__ModuleLoader__.load({
     .si-hint{font-size:12px;color:var(--dsw-alias-label-secondary)}
     .si-checkbox{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dsw-alias-label-secondary)}
     .si-formActions{display:flex;gap:8px}
-
     `)
 
     async function readJson(response) {
@@ -844,7 +842,6 @@ window.__ModuleLoader__.load({
           },
           () => React.createElement(ScheduledItemsPanel, null)
         ))
-
       },
     }
 
